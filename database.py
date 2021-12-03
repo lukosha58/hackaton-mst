@@ -25,7 +25,7 @@ def db_insert_user(user_id: int, username: str):  # Добавление пол�
 
 
 def db_insert_or_replace_result(user_id: int, time, result: int):  # Добавление или замена результата тестирования
-    cursor.execute("""REPLACE INTO test_result (user_id, time,result) VALUES (?, ?)""", (user_id, time, result))
+    cursor.execute("""REPLACE INTO test_result (user_id, time,result) VALUES (?, ?, ?)""", (user_id, time, result))
     conn.commit()
 
 
