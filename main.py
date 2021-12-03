@@ -4,7 +4,7 @@ import sqlite3
 from telebot import types
 
 
-bot = telebot.TeleBot("5099242576:AAEgBg9W_Wh2uDlpo32CBtQ5UbgqtlrgAz8") #2040450158:AAGUPpJtFVZ2Jf4Ewumiw6KExt_avu8hbnE
+bot = telebot.TeleBot("token") 
 TO_CHAT_ID = 731253916
 
 @bot.message_handler(commands=['start'])
