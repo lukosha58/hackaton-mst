@@ -61,7 +61,7 @@ def view_theme(message):
 def callback_worker(message):
     callbackk(message)
 
-@bot.callback_query_handler(func=lambda call: True)
+@bot.callback_query_handler(lambda message: "yes" in message.data)
 def test_bot(message):
     tests(message)
 bot.infinity_polling()
