@@ -1,53 +1,9 @@
-import telebot
 import database as db
-import sqlite3
-from telebot import types
-
-token = open("token").readline()
-bot = telebot.TeleBot(token)
+from help_func import *
 
 db.create_users_table()
 db.create_test_result_table()
 db.create_course_step_table()
-
-INLINE_MENU = [(("Курсы", "courses"), ("Тесты", "test")), ("Рейтинг", "rating")]
-INLINE_THEMES = [("Тема 1", "theme_1"), ("Тема 2", "theme_2")]
-INLINE_YES_NO = [(("Да", "yes"), ("Нет", "no"))]
-BUTTON_MENU = ["Меню", ("пися", "попа")]
-
-
-def get_keyboard_button(button_items, resize_keyboard=True, one_time_keyboard=True):
-    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=resize_keyboard, one_time_keyboard=one_time_keyboard)
-    for item in button_items:
-        if isinstance(item, tuple):
-            one_line_buttons = []
-            for i in item:
-                one_line_buttons.append(telebot.types.KeyboardButton(i))
-            keyboard.add(*one_line_buttons)
-        else:
-            keyboard.add(telebot.types.KeyboardButton(text=item))
-    return keyboard
-
-
-def get_inline_button(inline_items, row_width=3):
-    inline_buttons = telebot.types.InlineKeyboardMarkup(row_width=row_width)
-    for item in inline_items:
-        if isinstance(item[0], tuple):
-            one_line_buttons = []
-            for i in item:
-                one_line_buttons.append(telebot.types.InlineKeyboardButton(text=i[0], callback_data=i[1]))
-            inline_buttons.add(*one_line_buttons)
-        else:
-            inline_buttons.add(telebot.types.InlineKeyboardButton(text=item[0], callback_data=item[1]))
-    return inline_buttons
-
-
-def delete_last_messages(message):
-    bot.delete_message(message.chat.id, message.message_id)
-    try:
-        bot.delete_message(message.chat.id, message.message_id - 1)
-    except:
-        pass
 
 
 @bot.message_handler(commands=['start'])
@@ -75,7 +31,7 @@ def send_help(message):
     delete_last_messages(message)
 
 
-@bot.message_handler(content_types=['text'])  # реагирует на любую надпись в чате
+@bot.message_handler(commands=['menu'])  # реагирует на любую надпись в чате
 def send_menu(message):
     inline_buttons = get_inline_button(INLINE_MENU, 2)
     question = 'Меню'
@@ -83,25 +39,48 @@ def send_menu(message):
     delete_last_messages(message)
 
 
+@bot.message_handler(commands=['text'])  # реагирует на любую надпись в чате
+def wtf(message):
+    inline_buttons = get_inline_button(INLINE_MENU, 2)
+    question = 'Не понимаю что ты говоришь'
+    bot.send_message(message.from_user.id, text=question, reply_markup=inline_buttons)
+    delete_last_messages(message)
+
+
+@bot.callback_query_handler(lambda message: "menu" in message.data)
+def redirect_menu(message):
+    send_menu(message)
+
+
+@bot.callback_query_handler(lambda message: "theme" in message.data)
+def view_theme(message):
+    theme_num = check_theme_num(message.data)
+    print(theme_num)
+    print(edit_inline_button(theme_num, INLINE_VIEW_THEME))
+    bot.send_message(message.message.chat.id, text=COURSES[theme_num],
+                     reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME)))
+    delete_last_messages(message.message)
+
+
 @bot.callback_query_handler(func=lambda call: True)
-def callback_worker(call):
-    if call.data == "courses":
-        inline_buttons = get_inline_button(INLINE_THEMES)
+def callback_worker(message):
+    if "courses" in message.data:
+        course_num = check_theme_num(message.data)
         question = 'Выберите тему'
-        bot.send_message(call.message.chat.id, text=question, reply_markup=inline_buttons)
-    elif call.data == "test":
-        bot.answer_callback_query(callback_query_id=call.id,
+        bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(INLINE_THEMES))
+    elif message.data == "test":
+        bot.answer_callback_query(callback_query_id=message.id,
                                   text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
                                   show_alert=True)
 
         inline_buttons = get_inline_button(INLINE_YES_NO, 2)
         question = 'Вы уверены, что готовы пройти тест?'
-        bot.send_message(call.message.chat.id, text=question, reply_markup=inline_buttons)
+        bot.send_message(message.message.chat.id, text=question, reply_markup=inline_buttons)
 
-    elif call.data == "rating":
-        bot.send_message(call.message.chat.id, "А тут рейтинг")
-    delete_last_messages(call.message)
-    bot.answer_callback_query(callback_query_id=call.id)
+    elif message.data == "rating":
+        bot.send_message(message.message.chat.id, "А тут рейтинг")
+    delete_last_messages(message.message)
+    bot.answer_callback_query(callback_query_id=message.id)
 
 
 bot.infinity_polling()
