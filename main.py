@@ -28,7 +28,7 @@ def send_welcome(message):
 @bot.message_handler(commands=['help'])
 def send_help(message):
     bot.send_message(message.from_user.id, "Помогаю")
-    delete_last_messages(message)
+    delete_last_messages(message.message)
 
 
 @bot.message_handler(commands=['menu'])  # реагирует на любую надпись в чате
@@ -36,7 +36,7 @@ def send_menu(message):
     inline_buttons = get_inline_button(INLINE_MENU, 2)
     question = 'Меню'
     bot.send_message(message.from_user.id, text=question, reply_markup=inline_buttons)
-    delete_last_messages(message)
+    delete_last_messages(message.message)
 
 
 @bot.message_handler(commands=['text'])  # реагирует на любую надпись в чате
@@ -44,7 +44,7 @@ def wtf(message):
     inline_buttons = get_inline_button(INLINE_MENU, 2)
     question = 'Не понимаю что ты говоришь'
     bot.send_message(message.from_user.id, text=question, reply_markup=inline_buttons)
-    delete_last_messages(message)
+    delete_last_messages(message.message)
 
 
 @bot.callback_query_handler(lambda message: "menu" in message.data)
@@ -55,8 +55,6 @@ def redirect_menu(message):
 @bot.callback_query_handler(lambda message: "theme" in message.data)
 def view_theme(message):
     theme_num = check_theme_num(message.data)
-    print(theme_num)
-    print(edit_inline_button(theme_num, INLINE_VIEW_THEME))
     bot.send_message(message.message.chat.id, text=COURSES[theme_num],
                      reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME)))
     delete_last_messages(message.message)
@@ -65,9 +63,13 @@ def view_theme(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(message):
     if "courses" in message.data:
-        course_num = check_theme_num(message.data)
-        question = 'Выберите тему'
-        bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(INLINE_THEMES))
+        if "final" in message.data:
+            bot.send_message(message.message.chat.id, text="Вау ты прошёл весь курс",
+                             reply_markup=get_inline_button(INLINE_MENU))
+        else:
+            course_num = check_theme_num(message.data)
+            question = 'Выберите тему'
+            bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(INLINE_THEMES))
     elif message.data == "test":
         bot.answer_callback_query(callback_query_id=message.id,
                                   text="Внимание, для проходения теста вам потребует 10 минут свободного времени",

@@ -7,8 +7,7 @@ bot = telebot.TeleBot(token)
 
 INLINE_MENU = [[["Курсы", "courses"], ["Тесты", "test"]], ["Рейтинг", "rating"]]
 INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Меню", "menu"]]
-INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["Qr-код", "theme_3"],
-                 ["Qr-код", "theme_3"], ["Qr-код", "theme_3"], ["Qr-код", "theme_3"]]
+INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ]
 INLINE_YES_NO = [[["Да", "yes"], ["Нет", "no"]]]
 BUTTON_MENU = ["Меню", ["пися", "попа"]]
 COURSES = {"0": "https://telegra.ph/Password-12-04-2", "1": "https://telegra.ph/Transport-12-04-2",
@@ -41,10 +40,12 @@ def get_inline_button(inline_items, row_width=3):
             inline_buttons.add(telebot.types.InlineKeyboardButton(text=item[0], callback_data=item[1]))
     return inline_buttons
 
+
 def check_theme_num(data):
     for i in range(0, 4):
         if str(i) in data:
             return str(i)
+
 
 def edit_inline_button(course_num, inline_view_course):
     list_courses = copy.deepcopy(inline_view_course)
@@ -61,6 +62,7 @@ def edit_inline_button(course_num, inline_view_course):
         list_courses[0][1][1] += str(int(course_num) - 1)
 
     return list_courses
+
 
 def delete_last_messages(message):
     bot.delete_message(message.chat.id, message.message_id)
