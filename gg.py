@@ -2,7 +2,7 @@ import telebot
 import database
 import sqlite3
 from telebot import types
-bot = telebot.TeleBot("5014702781:AAHBod4tNbiPzZuzmJxXd9JKIR8X6EybuHQ")
+bot = telebot.TeleBot("")
 TO_CHAT_ID = 731253916
 is_reg=False
 database.db_create_users_table()
