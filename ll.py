@@ -1,35 +1,51 @@
 import telebot
 import database
 
-def callb():
+token = open("token").readline()
+bot = telebot.TeleBot(token)
+INLINE_MENU = [(("Курсы", "courses"), ("Тесты", "test")), ("Рейтинг", "rating")]
+INLINE_THEMES = [("Тема 1", "theme_1"), ("Тема 2", "theme_2")]
+INLINE_YES_NO = [(("Да", "yes"), ("Нет", "no"))]
+BUTTON_MENU = ["Меню", ("пися", "попа")]
+
+
+def delete_last_messages(message):
+    bot.delete_message(message.chat.id, message.message_id)
+    try:
+        bot.delete_message(message.chat.id, message.message_id - 1)
+    except:
+        pass
+
+
+def get_inline_button(inline_items, row_width=3):
+    inline_buttons = telebot.types.InlineKeyboardMarkup(row_width=row_width)
+    for item in inline_items:
+        if isinstance(item[0], tuple):
+            one_line_buttons = []
+            for i in item:
+                one_line_buttons.append(telebot.types.InlineKeyboardButton(text=i[0], callback_data=i[1]))
+            inline_buttons.add(*one_line_buttons)
+        else:
+            inline_buttons.add(telebot.types.InlineKeyboardButton(text=item[0], callback_data=item[1]))
+    return inline_buttons
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback(call):
     if call.data == "courses":
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        keyboard = telebot.types.InlineKeyboardMarkup()
-        key_menu = telebot.types.InlineKeyboardButton(text='Меню', callback_data='menu')
-        keyboard.add(key_menu)
-        key_t1 = telebot.types.InlineKeyboardButton(text='Какая-то тема1', callback_data='t1')
-        key_t2 = telebot.types.InlineKeyboardButton(text='Какая-то тема2', callback_data='t2')
-        keyboard.add(key_t1, key_t2)
-        key_t3 = telebot.types.InlineKeyboardButton(text='Какая-то тема3', callback_data='t3')
-        keyboard.add(key_t3)
+        inline_buttons = get_inline_button(INLINE_THEMES)
         question = 'Выберите тему'
-        bot.send_message(call.message.chat.id, text=question, reply_markup=keyboard)
+        bot.send_message(call.message.chat.id, text=question, reply_markup=inline_buttons)
     elif call.data == "test":
-        bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.answer_callback_query(callback_query_id=call.id,
                                   text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
                                   show_alert=True)
-        keyboard = telebot.types.InlineKeyboardMarkup()
-        key_yes = telebot.types.InlineKeyboardButton(text='Да', callback_data='Yes')
-        key_no = telebot.types.InlineKeyboardButton(text='Нет', callback_data='No')
-        keyboard.add(key_yes, key_no)
+
+        inline_buttons = get_inline_button(INLINE_YES_NO, 2)
         question = 'Вы уверены, что готовы пройти тест?'
-        bot.send_message(call.message.chat.id, text=question, reply_markup=keyboard)
+        bot.send_message(call.message.chat.id, text=question, reply_markup=inline_buttons)
 
     elif call.data == "rating":
-        bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, "А тут рейтинг")
-    elif call.data == "menu":
-        f1 = send_menu()
-        f1(message = "Menu")
-
+    delete_last_messages(call.message)
+    bot.answer_callback_query(callback_query_id=call.id)

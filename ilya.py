@@ -13,7 +13,7 @@ def send_welcome(message):
         inline_buttons = get_inline_button(INLINE_MENU, 2)
         db.insert_user(message.from_user.id, message.from_user.username, message.text)
         bot.send_message(message.from_user.id, text="Здраствуйте", reply_markup=inline_buttons)
-        delete_last_messages(message.message)
+        delete_last_messages(message)
 
     if not db.get_user(message.from_user.id):
         bot.send_message(message.from_user.id, text="Пожалуйста введите ФИО")
@@ -22,7 +22,7 @@ def send_welcome(message):
         inline_buttons = get_inline_button(INLINE_MENU, 2)
         bot.send_message(message.from_user.id, text="Здраствуйте", reply_markup=inline_buttons)
         bot.register_next_step_handler(message, send_menu)
-    delete_last_messages(message.message)
+    delete_last_messages(message)
 
 
 @bot.message_handler(commands=['help'])
