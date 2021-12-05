@@ -139,7 +139,15 @@ def edit_inline_button(theme_num, inline_view_course, db, message):
 
 
 def delete_last_messages(message, all_back=True):
-    bot.delete_message(message.chat.id, message.message_id)
+    if all_back:
+        for i in range(10):
+            try:
+                bot.delete_message(message.chat.id, message.message_id - i)
+            except:
+                pass
+
+    else:
+        bot.delete_message(message.chat.id, message.message_id)
 
 
 def gen_id_test(message, test, test_code):
