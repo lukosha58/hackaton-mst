@@ -1,5 +1,5 @@
 import database as db
-from help_func2 import *
+from help_func import *
 from tests import testing, check_ans
 import emoji
 
