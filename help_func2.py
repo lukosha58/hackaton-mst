@@ -13,13 +13,19 @@ INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"],
                  ["5", "theme_4"], ["6", "theme_5"], ["7", "theme_6"], ["8", "theme_7"], ["Меню", "menu"]]
 INLINE_YES_NO = [[["Да", "yes"], ["Нет", "no"]]]
 INLINE_TEST_NUMBERS = [["Тест по теме: Общественные места", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
-                       ["Тест по теме: Социальная инженерия", "Test_social"], ["Тест по теме: Личные данные \n в интернете", "Test_osint"],
-                       ["Тест по теме: Пароли", "Test_passwords"], ["Тест по теме: Физическая безопасность", "Test_physical"],
+                       ["Тест по теме: Социальная инженерия", "Test_social"],
+                       ["Тест по теме: Личные данные \n в интернете", "Test_osint"],
+                       ["Тест по теме: Пароли", "Test_passwords"],
+                       ["Тест по теме: Физическая безопасность", "Test_physical"],
                        ["Тест по теме: QR коды", "Test_qr"]]
 BUTTON_MENU = ["Меню"]
-ID_TESTS = {"pl" : "pl_{}_{}"}
+ID_TESTS = {"pl": "pl_{}_{}", "ph": "ph{}_{}", "se": "se_{}_{}", "pd": "pd_{}_{}", "osint": "osint_{}_{}",
+            "ps": "ps_{}_{}", "qr": "qr_{}_{}"}
 COURSES = {"0": "https://telegra.ph/Password-12-04-2", "1": "https://telegra.ph/Transport-12-04-2",
-           "2": "https://telegra.ph/QR-12-04", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7"}
+           "2": "https://telegra.ph/QR-12-04", "3": "https://telegra.ph/Lichnye-dannye-12-05",
+           "4": "https://telegra.ph/Socialnaya-inzheneriya-12-05",
+           "5": "https://telegra.ph/Fizicheskaya-bezopasnost-12-04",
+           "6": "https://telegra.ph/Fishing-12-04"}
 texts_tree = {"hello": "Здравствуйте, {}",
               "reg_fio": "Введите своё ФИО",
               "help": "Помогаю",
@@ -94,9 +100,9 @@ def callbackk(message):
             bot.send_message(message.from_user.id, text=texts_tree['choose_themes'],
                              reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
     elif "TEST" in message.data:
-        bot.answer_callback_query(callback_query_id=message.id,
-                                  text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
-                                  show_alert=True)
+        if not db.get_result(message.from_user.id):
+            pass
+            # db.insert_test_result(message.from_user.id)
         bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
                          reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
 
@@ -106,10 +112,6 @@ def callbackk(message):
 
     delete_last_messages(message.message)
     bot.answer_callback_query(callback_query_id=message.id)
-
-
-def testing(message):
-    pass
 
 
 def check_theme_num(data):
@@ -141,3 +143,19 @@ def delete_last_messages(message):
         bot.delete_message(message.chat.id, message.message_id)
     except:
         pass
+
+
+def gen_id_test(message, test, test_code):
+    file = open(test, encoding="utf-8")
+    rows = file.readlines()[::-1]
+    c = len(rows) #кол-во вопросов
+    c2 = 1
+    c3 = 2
+    c4 = 3
+
+    for i in rows:
+        question, ans_1, ans_2, ans_3, right_answer = i.split(";")
+        answers = [[ans_1, ID_TESTS[test_code].format(c, c2)], [ans_2, ID_TESTS[test_code].format(c, c3)], [ans_3, ID_TESTS[test_code].format(c, c4)]]
+        bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(answers, 3))
+        c -= 1
+    file.close()
