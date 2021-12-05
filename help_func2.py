@@ -17,7 +17,7 @@ INLINE_TEST_NUMBERS = [["Тест по теме: Общественные мес
                        ["Тест по теме: Пароли", "Test_passwords"], ["Тест по теме: Физическая безопасность", "Test_physical"],
                        ["Тест по теме: QR коды", "Test_qr"]]
 BUTTON_MENU = ["Меню"]
-ID_TESTS = {"pl" "pl_{}"}
+ID_TESTS = {"pl" : "pl_{}_{}"}
 COURSES = {"0": "https://telegra.ph/Password-12-04-2", "1": "https://telegra.ph/Transport-12-04-2",
            "2": "https://telegra.ph/QR-12-04", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7"}
 texts_tree = {"hello": "Здравствуйте, {}",
@@ -137,6 +137,5 @@ def edit_inline_button(theme_num, inline_view_course, db, message):
 def delete_last_messages(message):
     try:
         bot.delete_message(message.chat.id, message.message_id)
-        bot.delete_message(message.chat.id, message.message_id - 1)
     except:
         pass
