@@ -10,7 +10,10 @@ def create_users_table():  # Создание таблицы пользоват�
 
 
 def create_test_result_table():  # Создание таблицы результатов тестирований
-    cursor.execute("""CREATE TABLE IF NOT EXISTS test_result (user_id INT, time INT, result INT)""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS test_result (user_id BOOLEAN, time BOOLEAN, result BOOLEAN, 
+                    finish_first_test BOOLEAN, finish_test_public_place BOOLEAN, finish_phishing_test BOOLEAN,
+                    finish_social_test BOOLEAN, finish_osint_test BOOLEAN, finish_pass_test BOOLEAN, 
+                    finish_phys_test BOOLEAN, finish_qr_test BOOLEAN)""")
     conn.commit()
 
 
