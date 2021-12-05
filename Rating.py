@@ -1,6 +1,7 @@
 import threading
 import time
-
+from help_func2 import *
+from test import *
 def rating():
     score = 100
     while (score != 0):

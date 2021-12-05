@@ -1,21 +1,56 @@
 import telebot
 import copy
+import database as db
 from telebot import types
 
 #token = open("token").readline()
 bot = telebot.TeleBot("5014702781:AAHBod4tNbiPzZuzmJxXd9JKIR8X6EybuHQ")
 
-INLINE_MENU = [[["Курсы", "courses"], ["Тесты", "test"]], ["Рейтинг", "rating"]]
-INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Меню", "menu"]]
-INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["Qr-код", "theme_3"],
-                 ["Qr-код", "theme_3"], ["Qr-код", "theme_3"], ["Qr-код", "theme_3"]]
+INLINE_MENU = [[["Курс", "courses"], ["Тесты", "TEST"]], ["Рейтинг", "rating"],["QR-код", "qrcodecheck"]]
+INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Завершить курс", "final_courses"],
+                     ["Меню", "menu"]]
+INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["4", "theme_3"],
+                 ["5", "theme_4"], ["6", "theme_5"], ["7", "theme_6"], ["8", "theme_7"], ["Меню", "menu"]]
 INLINE_YES_NO = [[["Да", "yes"], ["Нет", "no"]]]
-BUTTON_MENU = ["Меню", ["пися", "попа"]]
+INLINE_TEST_NUMBERS = [["Тест по теме: Общественные места", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
+                       ["Тест по теме: Социальная инженерия", "Test_social"], ["Тест по теме: Личные данные \n в интернете", "Test_osint"],
+                       ["Тест по теме: Пароли", "Test_passwords"], ["Тест по теме: Физическая безопасность", "Test_physical"],
+                       ["Тест по теме: QR коды", "Test_qr"]]
+BUTTON_MENU = ["Меню"]
+ID_TESTS = {"pl" : "pl_{}_{}"}
 COURSES = {"0": "https://telegra.ph/Password-12-04-2", "1": "https://telegra.ph/Transport-12-04-2",
-           "2": "https://telegra.ph/QR-12-04"}
-INLINE_TESTS = [["Вариант 1", "one"], ["Вариант 2", "two"], ["Вариант 3","three"],["Вариант 4","four"]]
-Voprosi =["Вопрос 1", "Вопрос 2", "Вопрос третий"]
-users_info = []
+           "2": "https://telegra.ph/QR-12-04", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7"}
+texts_tree = {"hello": "Здравствуйте, вас приветствует бот MST, вы можете прислать QR-код и я проверю, какая ссылка лежит в нем",
+              "reg_fio": "Введите свою Фамилию Имя Отчество",
+              "help": "Какая требуется помощь?",
+              "wtf": "Не понимаю, что вы говорите, повторите вопрос или пропишите /start",
+              "menu": "Меню",
+              "done_course": "Поздравляю, ты прошёл весь курс",
+              "not_done_course": "Погоди, погоди, пройди сначала весь курс",
+              "choose_themes": "Выберите тему:",
+              "are_you_ready": "Вы уверены, что готовы пройти тест?",
+              "rating": "Рейтинг ушел....."}
+
+score = 0
+
+
+def is_done_full_course(db, message):
+    info = db.get_course_step(message.from_user.id)
+    for i in range(1, len(info)):
+        if info[i] in (False, None):
+            return False
+    return True
+
+
+def get_bool_theme(inline_items, db, message):
+    inline_items = copy.deepcopy(inline_items)
+    users_done_theme = db.get_course_step(message.from_user.id)
+    for i in range(len(inline_items) - 1):
+        if users_done_theme[i + 1]:
+            inline_items[i][0] += " ✅"
+        else:
+            inline_items[i][0] += " ❌"
+    return inline_items
 
 
 def get_keyboard_button(button_items, resize_keyboard=True, one_time_keyboard=True):
@@ -44,73 +79,65 @@ def get_inline_button(inline_items, row_width=3):
     return inline_buttons
 
 
+def callbackk(message):
+    if "courses" in message.data:
+        if "final" in message.data:
+            if is_done_full_course(db, message):
+                bot.send_message(message.from_user.id, text=texts_tree['done_course'],
+                                 reply_markup=get_inline_button(INLINE_MENU))
+            else:
+                bot.send_message(message.from_user.id, text=texts_tree['not_done_course'],
+                                 reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
+        else:
+            if not db.get_course_step(message.from_user.id):
+                db.insert_course_step(0, message.from_user.id, False)
+            bot.send_message(message.from_user.id, text=texts_tree['choose_themes'],
+                             reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
+    elif "TEST" in message.data:
+        bot.answer_callback_query(callback_query_id=message.id,
+                                  text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
+                                  show_alert=True)
+        bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
+                         reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
+
+
+    elif message.data == "rating":
+        bot.send_message(message.from_user.id, text=texts_tree["rating"])
+
+    delete_last_messages(message.message)
+    bot.answer_callback_query(callback_query_id=message.id)
+
+
+def testing(message):
+    pass
+
+
 def check_theme_num(data):
-    for i in range(0, 4):
+    for i in range(len(INLINE_THEMES) - 1):
         if str(i) in data:
             return str(i)
 
 
-def edit_inline_button(course_num, inline_view_course):
+def edit_inline_button(theme_num, inline_view_course, db, message):
     list_courses = copy.deepcopy(inline_view_course)
-    if course_num == str(0):
+
+    if theme_num == str(0):
         del list_courses[0][1]
-        list_courses[0][0][1] += str(int(course_num) + 1)
+        list_courses[0][0][1] += str(int(theme_num) + 1)
         return list_courses
-    elif course_num == str(len(inline_view_course)):
-        del list_courses[0][0]
-        list_courses[0][0][1] += str(int(course_num) - 1)
+    elif theme_num == str(len(INLINE_THEMES) - 2):
+        list_courses[0][1][1] += str(int(theme_num) - 1)
         return list_courses
     else:
-        list_courses[0][0][1] += str(int(course_num) + 1)
-        list_courses[0][1][1] += str(int(course_num) - 1)
-
+        list_courses[0][0][1] += str(int(theme_num) + 1)
+        list_courses[0][1][1] += str(int(theme_num) - 1)
+    if not is_done_full_course(db, message):
+        del list_courses[1]
     return list_courses
 
 
 def delete_last_messages(message):
-    bot.delete_message(message.chat.id, message.message_id)
     try:
-        bot.delete_message(message.chat.id, message.message_id - 1)
+        bot.delete_message(message.chat.id, message.message_id)
     except:
         pass
-
-
-def view(message):
-    theme_num = check_theme_num(message.data)
-    print(theme_num)
-    print(edit_inline_button(theme_num, INLINE_VIEW_THEME))
-    bot.send_message(message.message.chat.id, text=COURSES[theme_num],
-                     reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME)))
-    delete_last_messages(message.message)
-
-def callbackk(message):
-    if "courses" in message.data:
-        course_num = check_theme_num(message.data)
-        question = 'Выберите тему'
-        bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(INLINE_THEMES))
-    elif message.data == "test":
-        bot.answer_callback_query(callback_query_id=message.id,
-                                  text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
-                                  show_alert=True)
-
-        inline_buttons = get_inline_button(INLINE_YES_NO, 2)
-        question = 'Вы уверены, что готовы пройти тест?'
-        bot.send_message(message.message.chat.id, text=question, reply_markup=inline_buttons)
-        delete_last_messages(message.message)
-    elif message.data == "yes":
-        tests(message.message)
-    elif message.data == "rating":
-        bot.send_message(message.message.chat.id, "А тут рейтинг")
-    delete_last_messages(message.message)
-    bot.answer_callback_query(callback_query_id=message.id)
-
-def tests(message):
-    print("вызвалась")
-    inline_buttons = get_inline_button(INLINE_TESTS, 1)
-    for vopros in Voprosi:
-        vopros = Voprosi[1]
-    bot.send_message(message.chat.id, text=vopros, reply_markup=inline_buttons)
-    if message.data == "one":
-        print("+10 баллов")
-        bot.send_message(message.chat.id, text="Супергуд")
-    
