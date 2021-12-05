@@ -1,7 +1,7 @@
 import database as db
 from help_func2 import *
 from tests import testing, check_ans
-
+from qrcode import qr_code
 
 db.create_users_table()
 db.create_test_result_table()
@@ -80,5 +80,8 @@ def check_answer(message):
 def callback_worker(message):
     callbackk(message)
 
+@bot.message_handler(content_types=["photo"])
+def qrcode_worker(message):
+    qr_code(message)
 
 bot.infinity_polling()

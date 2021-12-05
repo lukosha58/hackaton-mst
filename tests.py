@@ -4,27 +4,36 @@ from right_ans import check_usr_ans
 token = open("token").readline()
 bot = telebot.TeleBot(token)
 
-TEST_ = {"Test_places": "theme_1"}
-
 
 def testing(message):
     if message.data == "Test_places":
-        file = open("test1", encoding="utf-8")
-        rows = file.readlines()[::-1]
-        c = len(rows)
-        c2 = 1
-        c3 = 2
-
-        for i in rows:
-            question, ans_1, ans_2, right_answer = i.split(";")
-            answers = [[ans_1, ID_TESTS["pl"].format(c, c2)], [ans_2, ID_TESTS["pl"].format(c, c3)]]
-            bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(answers, 2))
-            c -= 1
-        file.close()
+        gen_id_test(message, "test_files/public_text", "pl")
     elif message.data == "Test_qr":
-        print("qr")
+        gen_id_test(message, "test_files/qr_test", "qr")
+    elif message.data == "Test_phishing":
+        gen_id_test(message, "test_files/phishing_test", "ph")
+    elif message.data == "Test_social":
+        gen_id_test(message, "test_files/social_test", "se")
+    elif message.data == "Test_osint":
+        gen_id_test(message, "test_files/test_osint", "osint")
+    elif message.data == "Test_passwords":
+        gen_id_test(message, "test_files/test_passwords", "ps")
+    elif message.data == "Test_physical":
+        gen_id_test(message, "test_files/phys_test", "pd")
 
 
 def check_ans(message):
     if "pl" in message.data:
-        check_usr_ans(message, "test1", score)
+        check_usr_ans(message, "test_files/public_text", score)
+    elif "qr" in message.data:
+        check_usr_ans(message, "test_files/qr_test", score)
+    elif "ph" in message.data:
+        check_usr_ans(message, "test_files/phishing_test", score)
+    elif "se" in message.data:
+        check_usr_ans(message, "test_files/social_test", score)
+    elif "osing" in message.data:
+        check_usr_ans(message, "test_files/test_osint", score)
+    elif "ps" in message.data:
+        check_usr_ans(message, "test_files/test_passwords", score)
+    elif "pd" in message.data:
+        check_usr_ans(message, "test_files/phys_test", score)
