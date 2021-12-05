@@ -57,7 +57,8 @@ def redirect_menu(message):
 
 @bot.callback_query_handler(lambda message: "theme" in message.data)
 def view_theme(message):
-    theme_num = check_theme_num(message.data)
+    theme_num = check_theme_num\
+        (message.data)
     db.update_course_step(theme_num, message.from_user.id, True)
     bot.send_message(message.from_user.id, text=COURSES[theme_num],
                      reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME, db, message)))
@@ -79,6 +80,5 @@ def check_answer(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(message):
     callbackk(message)
-
 
 bot.infinity_polling()

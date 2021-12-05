@@ -31,6 +31,8 @@ texts_tree = {"hello": "Здравствуйте, {}",
               "are_you_ready": "Вы уверены, что готовы пройти тест?",
               "rating": "А тут рейтинг"}
 
+score = 0
+
 
 def is_done_full_course(db, message):
     info = db.get_course_step(message.from_user.id)
