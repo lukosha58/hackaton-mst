@@ -1,6 +1,6 @@
 import database as db
 from help_func2 import *
-from tests import testing
+from tests import testing, check_ans
 import emoji
 
 db.create_users_table()
@@ -62,9 +62,18 @@ def view_theme(message):
     bot.send_message(message.from_user.id, text=COURSES[theme_num],
                      reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME, db, message)))
     delete_last_messages(message.message)
+
+
 @bot.callback_query_handler(lambda message: "Test" in message.data)
 def test(message):
     testing(message)
+
+
+@bot.callback_query_handler(lambda message: "pl" in message.data)
+def check_answer(message):
+    check_ans(message)
+    delete_last_messages(message.message)
+
 
 
 @bot.callback_query_handler(func=lambda call: True)
