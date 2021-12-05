@@ -4,7 +4,7 @@ from right_ans import check_usr_ans
 token = open("token").readline()
 bot = telebot.TeleBot(token)
 
-TEST_ = {"Test_places": "theme_1" }
+TEST_ = {"Test_places": "theme_1"}
 
 
 def testing(message):

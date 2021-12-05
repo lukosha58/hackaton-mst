@@ -2,6 +2,7 @@ import database as db
 from help_func2 import *
 from tests import testing, check_ans
 
+
 db.create_users_table()
 db.create_test_result_table()
 db.create_course_step_table()
@@ -65,13 +66,14 @@ def view_theme(message):
 
 @bot.callback_query_handler(lambda message: "Test" in message.data)
 def test(message):
+    delete_last_messages(message.message, False)
     testing(message)
 
 
 @bot.callback_query_handler(lambda message: "pl" in message.data)
 def check_answer(message):
     check_ans(message)
-    delete_last_messages(message.message)
+    delete_last_messages(message.message, False)
 
 
 @bot.callback_query_handler(func=lambda call: True)

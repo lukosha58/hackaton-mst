@@ -109,12 +109,16 @@ def edit_inline_button(theme_num, inline_view_course, db, message):
     return list_courses
 
 
-def delete_last_messages(message):
-    try:
+def delete_last_messages(message, all_back=True):
+    if all_back:
+        for i in range(10):
+            try:
+                bot.delete_message(message.chat.id, message.message_id - i)
+            except:
+                pass
+
+    else:
         bot.delete_message(message.chat.id, message.message_id)
-        bot.delete_message(message.chat.id, message.message_id - 1)
-    except:
-        pass
 
 
 def callbackk(message):
@@ -134,7 +138,7 @@ def callbackk(message):
     elif "TEST" in message.data:
         if not db.get_result(message.from_user.id):
             db.insert_test_result(message.from_user.id)
-        bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
+        bot.send_message(message.from_user.id, text=texts_tree["choose_themes"],
                          reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
 
     elif message.data == "rating":
