@@ -11,7 +11,7 @@ def testing(message):
     elif message.data == "Test_qr":
         gen_id_test(message, "test_files/qr_test", "qr")
     elif message.data == "Test_phishing":
-        gen_id_test(message, "test_files/phishing_test", "ph")
+        gen_id_test(message, "test_files/phishing_text", "ph")
     elif message.data == "Test_social":
         gen_id_test(message, "test_files/social_test", "se")
     elif message.data == "Test_osint":
@@ -19,7 +19,7 @@ def testing(message):
     elif message.data == "Test_passwords":
         gen_id_test(message, "test_files/test_passwords", "ps")
     elif message.data == "Test_physical":
-        gen_id_test(message, "test_files/phys_test", "pd")
+        gen_id_test(message, "test_files/phys_text", "pd")
 
 
 def check_ans(message):
@@ -28,7 +28,7 @@ def check_ans(message):
     elif "qr" in message.data:
         check_usr_ans(message, "test_files/qr_test", score)
     elif "ph" in message.data:
-        check_usr_ans(message, "test_files/phishing_test", score)
+        check_usr_ans(message, "test_files/phishing_text", score)
     elif "se" in message.data:
         check_usr_ans(message, "test_files/social_test", score)
     elif "osing" in message.data:
@@ -36,4 +36,4 @@ def check_ans(message):
     elif "ps" in message.data:
         check_usr_ans(message, "test_files/test_passwords", score)
     elif "pd" in message.data:
-        check_usr_ans(message, "test_files/phys_test", score)
+        check_usr_ans(message, "test_files/phys_text", score)
