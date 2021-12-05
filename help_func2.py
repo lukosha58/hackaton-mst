@@ -9,10 +9,11 @@ bot = telebot.TeleBot(token)
 INLINE_MENU = [[["Курс", "courses"], ["Тесты", "TEST"]], ["Рейтинг", "rating"]]
 INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Завершить курс", "final_courses"],
                      ["Меню", "menu"]]
-INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["Личные данные", "theme_3"],
+INLINE_THEMES = [["Пароли", "theme_0"], ["Общественные сети", "theme_1"], ["Qr-код", "theme_2"],
+                 ["Личные данные", "theme_3"],
                  ["Социальная инженерия", "theme_4"], ["Физическая безопасность", "theme_5"], ["Фишинг", "theme_6"],
                  ["Меню", "menu"]]
-INLINE_TEST_NUMBERS = [["Тест по теме: Общественные места", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
+INLINE_TEST_NUMBERS = [["Тест по теме: Общественные сети", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
                        ["Тест по теме: Социальная инженерия", "Test_social"],
                        ["Тест по теме: Личные данные \n в интернете", "Test_osint"],
                        ["Тест по теме: Пароли", "Test_passwords"],
@@ -131,6 +132,8 @@ def callbackk(message):
             bot.send_message(message.from_user.id, text=texts_tree['choose_themes'],
                              reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
     elif "TEST" in message.data:
+        if not db.get_result(message.from_user.id):
+            db.insert_test_result(message.from_user.id)
         bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
                          reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
 
