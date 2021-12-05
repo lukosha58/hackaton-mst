@@ -1,5 +1,6 @@
 import database as db
 from help_func2 import *
+from tests import testing
 import emoji
 
 db.create_users_table()
@@ -61,17 +62,10 @@ def view_theme(message):
     bot.send_message(message.from_user.id, text=COURSES[theme_num],
                      reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME, db, message)))
     delete_last_messages(message.message)
-
 @bot.callback_query_handler(lambda message: "Test" in message.data)
 def test(message):
-    if message.data == "Test_places":
-        file = open("test1", encoding="utf-8")
-        for i in file.readlines():
-            question, ans_1, ans_2 = i.split(";")
-            answers = [[ans_1, "ans_1"], [ans_2, "ans_2"]]
-            bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(answers, 2))
-    elif message.data == "Test_qr":
-        print("qr")
+    testing(message)
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(message):
