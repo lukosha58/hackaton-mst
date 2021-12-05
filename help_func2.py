@@ -6,12 +6,16 @@ from telebot import types
 token = open("token").readline()
 bot = telebot.TeleBot(token)
 
-INLINE_MENU = [[["Курс", "courses"], ["Тесты", "test"]], ["Рейтинг", "rating"]]
+INLINE_MENU = [[["Курс", "courses"], ["Тесты", "TEST"]], ["Рейтинг", "rating"]]
 INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Завершить курс", "final_courses"],
                      ["Меню", "menu"]]
 INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["4", "theme_3"],
                  ["5", "theme_4"], ["6", "theme_5"], ["7", "theme_6"], ["8", "theme_7"], ["Меню", "menu"]]
 INLINE_YES_NO = [[["Да", "yes"], ["Нет", "no"]]]
+INLINE_TEST_NUMBERS = [["Тест по теме: Общественные места", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
+                       ["Тест по теме: Социальная инженерия", "Test_social"], ["Тест по теме: Личные данные \n в интернете", "Test_osint"],
+                       ["Тест по теме: Пароли", "Test_passwords"], ["Тест по теме: Физическая безопасность", "Test_physical"],
+                       ["Тест по теме: QR коды", "Test_qr"]]
 BUTTON_MENU = ["Меню"]
 COURSES = {"0": "https://telegra.ph/Password-12-04-2", "1": "https://telegra.ph/Transport-12-04-2",
            "2": "https://telegra.ph/QR-12-04", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7"}
@@ -71,6 +75,7 @@ def get_inline_button(inline_items, row_width=3):
             inline_buttons.add(telebot.types.InlineKeyboardButton(text=item[0], callback_data=item[1]))
     return inline_buttons
 
+
 def callbackk(message):
     if "courses" in message.data:
         if "final" in message.data:
@@ -85,12 +90,13 @@ def callbackk(message):
                 db.insert_course_step(0, message.from_user.id, False)
             bot.send_message(message.from_user.id, text=texts_tree['choose_themes'],
                              reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
-    elif "test" in message.data:
+    elif "TEST" in message.data:
         bot.answer_callback_query(callback_query_id=message.id,
                                   text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
                                   show_alert=True)
         bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
-                         reply_markup=get_inline_button(INLINE_YES_NO, 2))
+                         reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
+
 
     elif message.data == "rating":
         bot.send_message(message.from_user.id, text=texts_tree["rating"])
@@ -98,7 +104,10 @@ def callbackk(message):
     delete_last_messages(message.message)
     bot.answer_callback_query(callback_query_id=message.id)
 
+
 def testing(message):
+    pass
+
 
 def check_theme_num(data):
     for i in range(len(INLINE_THEMES) - 1):
