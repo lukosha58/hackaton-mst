@@ -1,4 +1,4 @@
-from help_func2 import *
+from help_func import *
 from right_ans import check_usr_ans
 
 token = open("token").readline()
