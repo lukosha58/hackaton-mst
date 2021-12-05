@@ -13,7 +13,7 @@ def send_welcome(message):
     def get_username(message):  # получаем ФИО
         inline_buttons = get_inline_button(INLINE_MENU, 2)
         db.insert_user(message.from_user.id, message.from_user.username, message.text)
-        bot.send_message(message.from_user.id, text=texts_tree['hello'].format(message.from_user.username),
+        bot.send_message(message.from_user.id, text=texts_tree['hello'].format(message.text),
                          reply_markup=inline_buttons)
         delete_last_messages(message)
 
@@ -62,6 +62,16 @@ def view_theme(message):
                      reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME, db, message)))
     delete_last_messages(message.message)
 
+@bot.callback_query_handler(lambda message: "Test" in message.data)
+def test(message):
+    if message.data == "Test_places":
+        file = open("test1", encoding="utf-8")
+        for i in file.readlines():
+            question, ans_1, ans_2 = i.split(";")
+            answers = [[ans_1, "ans_1"], [ans_2, "ans_2"]]
+            bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(answers, 2))
+    elif message.data == "Test_qr":
+        print("qr")
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(message):
