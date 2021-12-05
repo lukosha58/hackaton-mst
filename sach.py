@@ -1,5 +1,6 @@
 import database as db
-from help_func import *
+from help_func2 import *
+from tests import testing, check_ans
 
 db.create_users_table()
 db.create_test_result_table()
@@ -62,33 +63,20 @@ def view_theme(message):
     delete_last_messages(message.message)
 
 
+@bot.callback_query_handler(lambda message: "Test" in message.data)
+def test(message):
+    testing(message)
+
+
+@bot.callback_query_handler(lambda message: "pl" in message.data)
+def check_answer(message):
+    check_ans(message)
+    delete_last_messages(message.message)
+
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(message):
-    if "courses" in message.data:
-        if "final" in message.data:
-            if is_done_full_course(db, message):
-                bot.send_message(message.from_user.id, text=texts_tree['done_course'],
-                                 reply_markup=get_inline_button(INLINE_MENU))
-            else:
-                bot.send_message(message.from_user.id, text=texts_tree['not_done_course'],
-                                 reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
-        else:
-            if not db.get_course_step(message.from_user.id):
-                db.insert_course_step(0, message.from_user.id, False)
-            bot.send_message(message.from_user.id, text=texts_tree['choose_themes'],
-                             reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
-    elif "test" in message.data:
-        bot.answer_callback_query(callback_query_id=message.id,
-                                  text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
-                                  show_alert=True)
-        bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
-                         reply_markup=get_inline_button(INLINE_YES_NO, 2))
-
-    elif message.data == "rating":
-        bot.send_message(message.from_user.id, text=texts_tree["rating"])
-
-    delete_last_messages(message.message)
-    bot.answer_callback_query(callback_query_id=message.id)
+    callbackk(message)
 
 
 bot.infinity_polling()

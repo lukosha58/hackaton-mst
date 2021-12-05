@@ -6,7 +6,7 @@ from telebot import types
 token = open("token").readline()
 bot = telebot.TeleBot(token)
 
-INLINE_MENU = [[["Курс", "courses"], ["Тесты", "test"]], ["Рейтинг", "rating"]]
+INLINE_MENU = [[["Курс", "courses"], ["Тесты", "TEST"]], ["Рейтинг", "rating"]]
 INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Завершить курс", "final_courses"],
                      ["Меню", "menu"]]
 INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["Личные данные", "theme_3"],
@@ -36,6 +36,8 @@ texts_tree = {"hello": "Здравствуйте, {}",
               "choose_themes": "Выберите тему",
               "are_you_ready": "Вы уверены, что готовы пройти тест?",
               "rating": "А тут рейтинг"}
+
+score = 0
 
 
 def get_bool_theme(inline_items, db, message):
@@ -129,12 +131,8 @@ def callbackk(message):
             bot.send_message(message.from_user.id, text=texts_tree['choose_themes'],
                              reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
     elif "TEST" in message.data:
-        bot.answer_callback_query(callback_query_id=message.id,
-                                  text="Внимание, для проходения теста вам потребует 10 минут свободного времени",
-                                  show_alert=True)
         bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
                          reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
-
 
     elif message.data == "rating":
         bot.send_message(message.from_user.id, text=texts_tree["rating"])

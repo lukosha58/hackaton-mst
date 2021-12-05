@@ -16,8 +16,8 @@ def create_test_result_table():  # Создание таблицы резуль�
 
 def create_course_step_table():  # Создание таблицы, содержащей этап курса, на котором остановился пользователь
     cursor.execute(
-        """CREATE TABLE IF NOT EXISTS course_step (user_id INT, theme_0 BOOLEAN, theme_1 BOOLEAN, theme_2 BOOLEAN, theme_3 BOOLEAN, 
-        theme_4 BOOLEAN, theme_5 BOOLEAN, theme_6 BOOLEAN)""")
+        """CREATE TABLE IF NOT EXISTS course_step (user_id INT, theme_0 BOOLEAN, theme_1 BOOLEAN, theme_2 BOOLEAN,
+         theme_3 BOOLEAN, theme_4 BOOLEAN, theme_5 BOOLEAN, theme_6 BOOLEAN)""")
     conn.commit()
 
 
