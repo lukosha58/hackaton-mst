@@ -1,6 +1,5 @@
 import database as db
 from help_func import *
-import emoji
 
 db.create_users_table()
 db.create_test_result_table()
@@ -13,7 +12,7 @@ def send_welcome(message):
     def get_username(message):  # получаем ФИО
         inline_buttons = get_inline_button(INLINE_MENU, 2)
         db.insert_user(message.from_user.id, message.from_user.username, message.text)
-        bot.send_message(message.from_user.id, text=texts_tree['hello'].format(message.from_user.username),
+        bot.send_message(message.from_user.id, text=texts_tree['hello'].format(db.get_user(message.from_user.id)[2]),
                          reply_markup=inline_buttons)
         delete_last_messages(message)
 
@@ -22,7 +21,7 @@ def send_welcome(message):
         bot.register_next_step_handler(message, get_username)
     else:
         inline_buttons = get_inline_button(INLINE_MENU, 2)
-        bot.send_message(message.from_user.id, text=texts_tree['hello'].format(message.from_user.username),
+        bot.send_message(message.from_user.id, text=texts_tree['hello'].format(db.get_user(message.from_user.id)[2]),
                          reply_markup=inline_buttons)
         bot.register_next_step_handler(message, send_menu)
     delete_last_messages(message)
