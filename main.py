@@ -1,7 +1,7 @@
 import database as db
 from help_func import *
 from tests import testing, check_ans
-import emoji
+from qrcode import qr_code
 
 db.create_users_table()
 db.create_test_result_table()
@@ -57,8 +57,7 @@ def redirect_menu(message):
 
 @bot.callback_query_handler(lambda message: "theme" in message.data)
 def view_theme(message):
-    theme_num = check_theme_num\
-        (message.data)
+    theme_num = check_theme_num(message.data)
     db.update_course_step(theme_num, message.from_user.id, True)
     bot.send_message(message.from_user.id, text=COURSES[theme_num],
                      reply_markup=get_inline_button(edit_inline_button(theme_num, INLINE_VIEW_THEME, db, message)))
@@ -67,18 +66,22 @@ def view_theme(message):
 
 @bot.callback_query_handler(lambda message: "Test" in message.data)
 def test(message):
+    delete_last_messages(message.message, False)
     testing(message)
 
 
 @bot.callback_query_handler(lambda message: "pl" in message.data)
 def check_answer(message):
     check_ans(message)
-    delete_last_messages(message.message)
-
+    delete_last_messages(message.message, False)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(message):
     callbackk(message)
+
+@bot.message_handler(content_types=["photo"])
+def qrcode_worker(message):
+    qr_code(message)
 
 bot.infinity_polling()

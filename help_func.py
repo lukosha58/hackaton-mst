@@ -9,15 +9,17 @@ bot = telebot.TeleBot(token)
 INLINE_MENU = [[["Курс", "courses"], ["Тесты", "TEST"]], ["Рейтинг", "rating"]]
 INLINE_VIEW_THEME = [[["Следующая тема", "theme_"], ["Предыдущая тема", "theme_"]], ["Завершить курс", "final_courses"],
                      ["Меню", "menu"]]
-INLINE_THEMES = [["Пароли", "theme_0"], ["Транспорт", "theme_1"], ["Qr-код", "theme_2"], ["4", "theme_3"],
-                 ["5", "theme_4"], ["6", "theme_5"], ["7", "theme_6"], ["8", "theme_7"], ["Меню", "menu"]]
-INLINE_YES_NO = [[["Да", "yes"], ["Нет", "no"]]]
-INLINE_TEST_NUMBERS = [["Тест по теме: Общественные места", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
+INLINE_THEMES = [["Пароли", "theme_0"], ["Общественные сети", "theme_1"], ["Qr-код", "theme_2"],
+                 ["Личные данные", "theme_3"],
+                 ["Социальная инженерия", "theme_4"], ["Физическая безопасность", "theme_5"], ["Фишинг", "theme_6"],
+                 ["Меню", "menu"]]
+INLINE_TEST_NUMBERS = [["Тест по теме: Общественные сети", "Test_places"], ["Тест по теме: Фишинг", "Test_phishing"],
                        ["Тест по теме: Социальная инженерия", "Test_social"],
                        ["Тест по теме: Личные данные \n в интернете", "Test_osint"],
                        ["Тест по теме: Пароли", "Test_passwords"],
                        ["Тест по теме: Физическая безопасность", "Test_physical"],
                        ["Тест по теме: QR коды", "Test_qr"]]
+INLINE_YES_NO = [[["Да", "yes"], ["Нет", "no"]]]
 BUTTON_MENU = ["Меню"]
 ID_TESTS = {"pl": "pl_{}_{}", "ph": "ph{}_{}", "se": "se_{}_{}", "pd": "pd_{}_{}", "osint": "osint_{}_{}",
             "ps": "ps_{}_{}", "qr": "qr_{}_{}"}
@@ -26,26 +28,19 @@ COURSES = {"0": "https://telegra.ph/Password-12-04-2", "1": "https://telegra.ph/
            "4": "https://telegra.ph/Socialnaya-inzheneriya-12-05",
            "5": "https://telegra.ph/Fizicheskaya-bezopasnost-12-04",
            "6": "https://telegra.ph/Fishing-12-04"}
-texts_tree = {"hello": "Здравствуйте, {}",
-              "reg_fio": "Введите своё ФИО",
-              "help": "Помогаю",
-              "wtf": "Не понимаю что ты пишешь",
-              "menu": "Меню",
-              "done_course": "Вау ты прошёл весь курс",
-              "not_done_course": "Нет, ещё не все курсы сделаны",
-              "choose_themes": "Выберите тему",
-              "are_you_ready": "Вы уверены, что готовы пройти тест?",
-              "rating": "А тут рейтинг"}
+texts_tree = {
+    "hello": "Здравствуйте, {}, вас приветствует бот MST, вы можете прислать QR-код и я проверю, какая ссылка лежит в нем",
+    "reg_fio": "Введите Фамилию Имя Отчество",
+    "help": "Какая требуется помощь?",
+    "wtf": "Не понимаю, что вы говорите, повторите вопрос или пропишите /start",
+    "menu": "Меню",
+    "done_course": "Поздравляю, ты прошёл весь курс",
+    "not_done_course": "Погоди, погоди, пройди сначала весь курс",
+    "choose_themes": "Выберите тему:",
+    "are_you_ready": "Вы уверены, что готовы пройти тест?",
+    "rating": "Рейтинг ушел....."}
 
 score = 0
-
-
-def is_done_full_course(db, message):
-    info = db.get_course_step(message.from_user.id)
-    for i in range(1, len(info)):
-        if info[i] in (False, None):
-            return False
-    return True
 
 
 def get_bool_theme(inline_items, db, message):
@@ -101,11 +96,9 @@ def callbackk(message):
                              reply_markup=get_inline_button(get_bool_theme(INLINE_THEMES, db, message)))
     elif "TEST" in message.data:
         if not db.get_result(message.from_user.id):
-            pass
-            # db.insert_test_result(message.from_user.id)
-        bot.send_message(message.from_user.id, text=texts_tree["are_you_ready"],
+            db.insert_test_result(message.from_user.id)
+        bot.send_message(message.from_user.id, text=texts_tree["choose_themes"],
                          reply_markup=get_inline_button(INLINE_TEST_NUMBERS, 2))
-
 
     elif message.data == "rating":
         bot.send_message(message.from_user.id, text=texts_tree["rating"])
@@ -120,16 +113,23 @@ def check_theme_num(data):
             return str(i)
 
 
+def is_done_full_course(db, message):
+    info = db.get_course_step(message.from_user.id)
+    for i in range(1, len(info)):
+        if info[i] in (False, None):
+            return False
+    return True
+
+
 def edit_inline_button(theme_num, inline_view_course, db, message):
     list_courses = copy.deepcopy(inline_view_course)
 
     if theme_num == str(0):
         del list_courses[0][1]
         list_courses[0][0][1] += str(int(theme_num) + 1)
-        return list_courses
     elif theme_num == str(len(INLINE_THEMES) - 2):
-        list_courses[0][1][1] += str(int(theme_num) - 1)
-        return list_courses
+        del list_courses[0][0]
+        list_courses[0][0][1] += str(int(theme_num) - 1)
     else:
         list_courses[0][0][1] += str(int(theme_num) + 1)
         list_courses[0][1][1] += str(int(theme_num) - 1)
@@ -138,24 +138,21 @@ def edit_inline_button(theme_num, inline_view_course, db, message):
     return list_courses
 
 
-def delete_last_messages(message):
-    try:
-        bot.delete_message(message.chat.id, message.message_id)
-    except:
-        pass
+def delete_last_messages(message, all_back=True):
+    bot.delete_message(message.chat.id, message.message_id)
 
 
 def gen_id_test(message, test, test_code):
     file = open(test, encoding="utf-8")
     rows = file.readlines()[::-1]
-    c = len(rows) #кол-во вопросов
+    c = len(rows)  # кол-во вопросов
     c2 = 1
     c3 = 2
     c4 = 3
-
     for i in rows:
         question, ans_1, ans_2, ans_3, right_answer = i.split(";")
-        answers = [[ans_1, ID_TESTS[test_code].format(c, c2)], [ans_2, ID_TESTS[test_code].format(c, c3)], [ans_3, ID_TESTS[test_code].format(c, c4)]]
+        answers = [[ans_1, ID_TESTS[test_code].format(c, c2)], [ans_2, ID_TESTS[test_code].format(c, c3)],
+                   [ans_3, ID_TESTS[test_code].format(c, c4)]]
         bot.send_message(message.message.chat.id, text=question, reply_markup=get_inline_button(answers, 3))
         c -= 1
     file.close()
